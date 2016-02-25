@@ -11,40 +11,37 @@
 	input[type= button] {width: 40px; height: 30px;}
 </style>
 </head>
+<script type="text/javascript">
+	(function(width, height, length, current, dx, dy, x, y, hasFood, newEl){     
+    
+	document.body.onkeydown = function(e){
+    dx = (e.keyCode - 38) % 2, dy = (e.keyCode - 39) % 2;
+	};
+    
+	var timer = setInterval(function () {
+    x = (x + dx) < 0 ? width - 1 : (x + dx) % width; 
+    y = (y + dy) < 0 ? height - 1 : (y + dy) % height;
+    newEl = document.getElementsByClassName(y + '_' + x)[0]
+    if(newEl.className.indexOf('s') > 0) {
+    	clearInterval(timer), alert('Game Over! Score: ' + length)
+    };
+    if(newEl.className.indexOf('f') > 0) {
+    	newEl.className = newEl.className.replace(' f', ''), length++, hasFood = false;
+    }
+    newEl.className += ' s', newEl.setAttribute('data-n', current++);
 
-<body>
-<script src="snake.js"></script>
-<form name="calc" id="calculator">
-	<table>
-	<tr>
-	<td>
-		<input type="text" name="input" size="16" class="display">
-	</td>
-	</tr>
-	<tr>
-	<td class="buttons">
-		<input type="button" name="one" value="1" OnClick="calc.input.value += '1'">
-		<input type="button" name="two" value="2" OnClick="calc.input.value += '2'">
-		<input type="button" name="three" value="3" OnClick="calc.input.value += '3'">
-		<input type="button" name="add" value="+" OnClick="calc.input.value += '+'">
-		<br>
-		<input type="button" name="four" value="4" OnClick="calc.input.value += '4'">
-		<input type="button" name="five" value="5" OnClick="calc.input.value += '5'">
-		<input type="button" name="six" value="6" OnClick="calc.input.value += '6'">
-		<input type="button" name="sub" value="-" OnClick="calc.input.value += '-'">
-		<br>
-		<input type="button" name="seven" value="7" OnClick="calc.input.value += '7'">
-		<input type="button" name="eight" value="8" OnClick="calc.input.value += '8'">
-		<input type="button" name="nine" value="9" OnClick="calc.input.value += '9'">
-		<input type="button" name="mul" value="x" OnClick="calc.input.value += '*'">
-		<br>
-		<input type="button" name="clear" value="c" OnClick="calc.input.value = ''">
-		<input type="button" name="zero" value="0" OnClick="calc.input.value += '0'">
-		<input type="button" name="doit" value="=" OnClick="calc.input.value = eval(calc.input.value)">
-		<input type="button" name="div"  value="/" OnClick="calc.input.value += '/'">
-	</td>
-	</tr>
-	</table>
-</form>
+    for(var i = 0, min = Infinity, item, items = document.getElementsByClassName('s'), len = items.length; i < len && len > length; i++)
+    	if(+items[i].getAttribute('data-n') < min)
+    		min = +items[i].getAttribute('data-n'), item = items[i];
+
+    if(!!item) item.className = item.className.replace(' s', '');
+
+    for(var fItem, fX, fY; !hasFood; fX = Math.round(Math.random() * 10 % width), fY = Math.round(Math.random() * 10 % height))
+    	if(!!fX && !!fY && document.getElementsByClassName(fY + '_' + fX)[0].className.indexOf('s') < 0)
+    		hasFood = true, document.getElementsByClassName(fY + '_' + fX)[0].className += ' f';
+		}, 1000);
+
+	})(10, 10, 5, 1, 1, 0, 0, 0, false, null);
+</script>
 </body>
 </html>
