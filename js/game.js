@@ -1,243 +1,320 @@
-function playgame() {
-    if (!myGameArea.interval) {
-        myGameArea.interval = setInterval(updateGameArea, 20);
-    } else {
-        myGameArea.pause = false;
-    }
-}
-function pausegame() {
-    myGameArea.pause = true;
-}
+/*------------------------------------Объектный состав игры 'Арканоид'----------------------------------------------*/
+   //JavaScript Объект 'игровая площадка' (playing area)
+   function pa()
+   {
+     //Получаем элемент по id средствами jQuery
+     this.element = $("#playing-area");
 
-var myball;
-var myGamePiece;
-var myObstacles = [];
+     //Выравниваем размер игровой площадки в соответствии с количеством кирпичей
+     this.element.width(Math.round(this.element.width() / _bricks_line) * _bricks_line);   
+     this.element.height(Math.round(this.element.height() / _bricks_lines_max) * _bricks_lines_max);   
 
-function startGame() {
-    var x = 0, y = 12;
-    myGameArea.start();
-    myGamePiece = new component(100, 10, "red", myGameArea.canvas.width / 2 - 50, myGameArea.canvas.height - 20);
-    myball = new component(5, 5, "black", myGameArea.canvas.width / 2 - 2.5 - 100, 110);    
-    for (i = 0; i < 68; i++) {
-        if ((x + 30) > myGameArea.canvas.width) {
-            x = 0;
-            y = y + 15;
-        }
-        if (x == 0) {x = 20; }
-        x = x + 5;
-        myObstacles.push(new component(30, 10, "green", x, y));
-        x = x + 30;
-    }
-    myGameArea.setsize();
-    myball.speedY -= 2;
-    myball.speedX -= 2;    
-}
+     //Сохраняем параметры смещения и габариты
+     this.offset = this.element.offset();
+     this.width = this.element.width();
+     this.height = this.element.height();
 
-var myGameArea = {
-    canvas : document.createElement("canvas"),
-    start : function() {
-        this.canvas.width = 640;
-        this.canvas.height = 250;
-        this.pause = false;
-        this.frameNo = 0;
-        this.canvas.style.cursor = "none"; //hide the original cursor
-        this.context = this.canvas.getContext("2d");
-        myGameArea.interval = setInterval(updateGameArea, 20);
-        document.body.insertBefore(this.canvas, document.body.childNodes[0]);
-        window.addEventListener('mousemove', function (e) {
-            myGameArea.x = e.pageX;
-            myGameArea.y = e.pageY;
-        })
-        window.addEventListener('devicemotion', function (e) {
-            e.preventDefault();    
-            var orientation = window.orientation;
-            if (orientation == 0) {
-                myGameArea.tiltX = e.accelerationIncludingGravity.x / myGameArea.scale;
-                myGameArea.tiltY = -(e.accelerationIncludingGravity.y / myGameArea.scale);
-            } else if (orientation == 90) {
-                myGameArea.tiltY = -(e.accelerationIncludingGravity.x / myGameArea.scale);
-                myGameArea.tiltX = -(e.accelerationIncludingGravity.y / myGameArea.scale);
-            } else if (orientation == -90) {
-                myGameArea.tiltY = e.accelerationIncludingGravity.x / myGameArea.scale;
-                myGameArea.tiltX = e.accelerationIncludingGravity.y / myGameArea.scale;
-            }
-        });
-        window.addEventListener('resize', function (e) {
-            myGameArea.setsize();
-        });        
-    },
-    clear : function() {
-        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    },
-    stop : function() {
-        clearInterval(this.interval);
-        this.pause = true;        
-    },    
-    setsize : function() {
-        this.ratio = this.canvas.height / this.canvas.width,
-        this.currentWidth = window.innerWidth;
-        this.currentHeight = this.currentWidth * this.ratio;
-        this.canvas.style.width = this.currentWidth - 20 + "px";
-        this.canvas.style.height = this.currentHeight + "px";
-        this.scale = this.currentWidth / this.canvas.width;
-    }
-    
-}
+     //Вычисляем размеры объекта 'кирпич'
+     this.brick_width = Math.round(this.width / _bricks_line);
+     this.brick_height = Math.round(this.height / _bricks_lines_max); 
 
-function component(width, height, color, x, y) {
-    this.width = width;
-    this.height = height;
-    this.speedX = 0;
-    this.speedY = 0;    
-    this.x = x;
-    this.y = y;    
-    this.update = function() {
-        ctx = myGameArea.context;
-        ctx.fillStyle = color;
-        ctx.fillRect(this.x, this.y, this.width, this.height);
-    }
-    this.crashLeft = function(otherobj) {
-        var myleft = this.x;
-        var myright = this.x + (this.width);
-        var mytop = this.y;
-        var mybottom = this.y + (this.height);
-        var otherleft = otherobj.x;
-        var otherright = otherobj.x + (otherobj.width);
-        var othertop = otherobj.y;
-        var otherbottom = otherobj.y + (otherobj.height);
-        var crash = false;
-        if (myleft < otherleft && myright > otherleft && mytop < otherbottom && mybottom > othertop) {
-            crash = true;
-        }
-        return crash;
-    }
-    this.crashRight = function(otherobj) {
-        var myleft = this.x;
-        var myright = this.x + (this.width);
-        var mytop = this.y;
-        var mybottom = this.y + (this.height);
-        var otherleft = otherobj.x;
-        var otherright = otherobj.x + (otherobj.width);
-        var othertop = otherobj.y;
-        var otherbottom = otherobj.y + (otherobj.height);
-        var crash = false;
-        if (myright > otherright && myleft < otherright && mytop < otherbottom && mybottom > othertop) {
-            crash = true;
-        }
-        return crash;
-    }
-    this.crashWith = function(otherobj) {
-        var myleft = this.x;
-        var myright = this.x + (this.width);
-        var mytop = this.y;
-        var mybottom = this.y + (this.height);
-        var otherleft = otherobj.x;
-        var otherright = otherobj.x + (otherobj.width);
-        var othertop = otherobj.y;
-        var otherbottom = otherobj.y + (otherobj.height);
-        var crash = true;
-        if ((mybottom < othertop) || (mytop > otherbottom) || (myright < otherleft) || (myleft > otherright)) {
-            crash = false;
-        }
-        return crash;
-    }
-    this.hitLeftBoundary = function() {
-        var hit = false;
-        var leftPos = this.x;
-        if (leftPos <= 0) {
-            hit = true;
-        }
-        return hit;
-    } 
-    this.hitRightBoundary = function() {
-        var hit = false;
-        var rightPos = this.x + this.width;
-        if (rightPos > myGameArea.canvas.width) {
-            hit = true;
-        }
-        return hit;
-    }
-    this.hitTopBoundary = function() {
-        var hit = false;
-        var topPos = this.y;
-        if (topPos <= 0) {
-            hit = true;
-        }
-        return hit;
-    }     
-    this.hitBottomBoundary = function() {
-        var hit = false;
-        var bottomPos = this.y + (this.height);
-        if (bottomPos >= myGameArea.canvas.height) {
-            hit = true;
-        }
-        return hit;
-    }     
-    this.hitAnyBoundary = function() {
-        if (this.hitLeftBoundary()) {return true;}
-        if (this.hitRightBoundary()) {return true;}
-        if (this.hitTopBoundary()) {return true;}
-        if (this.hitBottomBoundary()) {return true;}                        
-        return false;
-    }
-}
-var lastspeedX = 0;
-var ss = 0;
-function updateGameArea() {
-    var x, y, speed = 0;
-    for (i = 0; i < myObstacles.length; i += 1) {
-        if (myball.crashWith(myObstacles[i])) {
-            if (myball.crashLeft(myObstacles[i]) || myball.crashRight(myObstacles[i])) {
-                myball.speedX = -(myball.speedX);            
-            } else {
-                myball.speedY = -(myball.speedY);            
-            }
-            myObstacles.splice(i, 1);
-        } 
-    }
-    if (myGameArea.tiltX) {
-        myGamePiece.speedX = myGameArea.tiltX + 1;
-    }
-    if (myGameArea.x) {
-        myGamePiece.x = myGameArea.x;
-        if (lastspeedX) {speed = (myGameArea.x - lastspeedX) / 2; }
-        lastspeedX = myGameArea.x;
-    }
-    if (myball.crashWith(myGamePiece)) {
-        myball.speedY = -(myball.speedY);
-        myball.speedX = myball.speedX + speed;
-        if (myball.speedX > 2) {myball.speedX = 2; }
-    } 
-    if (myball.hitLeftBoundary()) {
-        myball.speedX = -(myball.speedX);
-    } 
-    if (myball.hitRightBoundary()) {
-        myball.speedX = -(myball.speedX);
-    } 
-    if (myball.hitTopBoundary()) {
-        myball.speedY = -(myball.speedY);
-    } 
-    if (myball.hitBottomBoundary()) {
-        myGameArea.stop();
-    }
-    if (myGamePiece.hitAnyBoundary()) {
-        if (myGamePiece.x < 0) {myGamePiece.x = 0;}
-        if (myGamePiece.x > myGameArea.canvas.width - myGamePiece.width) {myGamePiece.x = myGameArea.canvas.width - myGamePiece.width;}
-    }
-    if (myGameArea.pause == false) {
-        myGameArea.clear();
-        myGameArea.frameNo += 1;
-        for (i = 0; i < myObstacles.length; i += 1) {
-            myObstacles[i].update();
-        }
-        myball.x += myball.speedX;
-        myball.y += myball.speedY;    
-        myball.update();
-        myGamePiece.x += myGamePiece.speedX;
-        myGamePiece.y += myGamePiece.speedY;    
-        myGamePiece.update();
-        if (myGameArea.frameNo == 1) {
-            myGameArea.pause = true;
-        }
-    }
-}
+     //Создаем экземпляры платформы-ракетки и шарика
+     this.platform = new platform(this);
+     this.ball = new ball(this);
+
+     //Методы объекта:
+     //Создаем объекты 'кирпич' средствами jQuery
+     this.initBricks = function()
+      {
+       for (var i = 0; i < _bricks_lines; i++)
+            for (var j = 0; j < _bricks_line; j++)
+                 //Метод prepend() позволяет добавить HTML в конец содержимого игровой площадки
+                 this.element.prepend("<div id='brick_"+i+"_"+j+"' class='brick' style='left:"+(j * this.brick_width + 1)+"px; top:"+(i * this.brick_height + 1)+"; width:"+(this.brick_width - 2)+"px; height: "+(this.brick_height - 2)+"px'><p>"
+				      + (Math.round(Math.random() * (_bricks_lines - i)) + (_bricks_lines - i)) + "</p></div>");
+      }
+     
+     //Функция подготовки площадки arcanoid к началу игры
+     this.prepare = function()
+      {
+       this.try_count = _try_count_max;
+       this.score = 0;
+
+       //Если остались кирпичи с прошлого сеанса игры, то все их удаляем средствами запроса jQuery 
+       $('.brick').remove();
+
+       //Создаем кирпичи по новой
+       this.initBricks();
+       //Устанавливаем шарик на платформе
+       this.ball.reset();
+       //Выводим информацию о количестве попыток и очках
+       this.showInfo();
+      }
+
+     //Вывод информации о количестве попыток и очках
+     this.showInfo =  function()
+      {
+       var _try_count_balls = "";
+       for (var i = 0; i < this.try_count - 1; i++)
+            _try_count_balls = _try_count_balls + "<div class='ball' style='position: relative; float: left;'></div>";
+
+       $('#info').html("$" + this.score + "<br/>" + _try_count_balls);
+      }
+   }
+ 
+   //JavaScript Объект 'платформа-ракетка'
+   function platform(pa)
+   {
+     //Определяем и инициализируем свойства объекта
+     this.pa = pa;
+     this.element = $("#platform"); //Получаем элемент по id средствами jQuery
+     this.width = this.element.width();
+     this.height = this.element.height();
+     this.interval = 0;
+     this.dx = 0;
+     this.last_x = 0;
+
+     //Методы объекта:
+     //Вычисление вектора перемещения платформы (используется для эффекта 'подрезания')
+     this.evaluate_dx = function()
+     {
+       if (this.last_x > 0)                 
+           this.dx = this.element.offset().left - this.last_x;  
+
+       this.last_x = this.element.offset().left;
+     }
+
+     //Перемещение
+     this.move = function(x)
+     {
+       var _left = x - this.width / 2; 
+       var _left_min = this.pa.offset.left;   
+       var _left_max = this.pa.offset.left + this.pa.width - this.width;   
+
+       if (_left < _left_min)
+           _left = _left_min;
+
+       if (_left > _left_max)
+           _left = _left_max;
+
+        this.element.offset({left:_left});
+
+       //Если шарик в состоянии покоя, то выравниваем его по центру платформы
+       if (this.pa.ball.ready)
+           this.pa.ball.setUp();
+     }
+   }
+
+   //JavaScript Объект 'шарик'
+   function ball(pa)
+   {
+     //Определяем и инициализируем свойства объекта
+     this.pa = pa;
+     this.element = $("#ball"); //Получаем элемент по id средствами jQuery
+     this.width = this.element.width();
+     this.height = this.element.height();
+     this.interval = 0;
+     this.ready = true;
+     this.dx = 0;
+     this.dy = 0;
+
+     //Методы объекта:
+     //Функция отбивания шарика
+     this.kick = function() 
+     {
+      if (this.dy > 0)
+          this.dy = -this.dy;
+      else
+         {/*Запуск с платформы*/
+          if (this.pa.platform.dx == 0)/*Если платформа в покое, то смещение по горизонтали рассчитывается случайным образом*/ 
+              this.dx = 2 - Math.round(Math.random() * 5);
+
+          this.dy = -_ball_dy;
+         }
+
+      this.dx = this.dx + Math.round(this.pa.platform.dx / 5);
+     
+      //Ограничение по скорости по горизонтали
+      if (Math.abs(this.dx) > _ball_dx_max)
+          if (this.dx > 0)
+              this.dx = _ball_dx_max;
+          else
+              this.dx = -_ball_dx_max;
+      }
+ 
+      //Установка шарика по центру платформы
+      this.setUp = function()
+      {
+       this.element.offset({left:this.pa.platform.element.offset().left + this.pa.platform.width / 2 - this.width / 2, top:this.pa.platform.element.offset().top - this.height});  
+      }  
+   
+      //Обработка 'падения' шарика - отключение обработчика, установка на платформе и обнуление вектора смещения
+      this.reset = function()
+      {
+        if (this.interval)
+            clearInterval(this.interval);
+
+        this.setUp();
+  
+        this.dx = 0;
+        this.dy = 0;
+        this.ready = true;
+      }
+
+      //Единичное перемещение шарика
+      this.move = function()
+      {
+       var _ball_offset = this.element.offset();
+       var _platform_offset = this.pa.platform.element.offset();
+     
+       if ((_ball_offset.left < this.pa.offset.left && this.dx < 0) || (_ball_offset.left + this.width > this.pa.offset.left + this.pa.width && this.dx > 0))
+           this.dx = -this.dx //Удар о вертикальные стенки
+       else if (_ball_offset.top < this.pa.offset.top && this.dy < 0)
+                this.dy = -this.dy //Удар о верхнюю стенку
+            else if (_ball_offset.top > _platform_offset.top - this.height  && this.dy > 0) //Падение ниже платформы
+                     if (_ball_offset.left > _platform_offset.left - this.width && _ball_offset.left < _platform_offset.left + this.pa.platform.width)
+                        {//Отбивание платформой
+                         this.kick();
+                         this.pa.platform.element.fadeTo(200, 0.5, function(){$("#platform").fadeTo(200, 1)});
+                        } 
+                     else //Обработка падения шарика
+                         {
+                          this.pa.try_count--; //уменьшение количества попыток
+
+                          if (this.pa.try_count > 0)
+                             {//Старт с новой попыткой  
+                              this.pa.showInfo();
+                              this.reset();
+                             } 
+                          else //Окончание игры
+                             gameOver(); 
+
+                          return;
+                         }
+
+       //Обработка попадания по кирпичам:
+       //Вычисляем предполагаемые координаты в следующий момент
+       var _ball_next_x = _ball_offset.left + this.dx;   
+       var _ball_next_y = _ball_offset.top + this.dy;
+       //Вычисляем координаты кирпича в системе координат 'место-ряд'
+       var _xindex = Math.floor((_ball_next_x - this.pa.offset.left) / this.pa.brick_width);
+       var _yindex = Math.floor((_ball_next_y - this.pa.offset.top) / this.pa.brick_height);
+
+       //Ищем элемент 'кирпич' средствами запроса jQuery по id
+       var _bricks = $("#brick_"+_yindex+"_"+_xindex);
+       if (_bricks.size() > 0)
+           {
+            var _brick = _bricks[0];
+            //Если кирпич не в состоянии 'удаления', то инициализируем его удаление и рассчитываем отскок
+            if (typeof _brick.broken == "undefined")
+               { 
+                //Получаем параметры области блочного элемента
+                var _rect = _brick.getBoundingClientRect();
+         
+                //Определяем направление отскока
+                if (_ball_offset.left > _rect.left - this.width && _ball_offset.top < _rect.left + _rect.width)
+                   this.dy = -this.dy;
+                else
+                   this.dx = -this.dx;
+         
+                //Помечаем кирпич как 'удаляемый'
+                _brick.broken = true;  
+                //Инициализируем удаление элемента 'кирпич' после его исчезновения средствами jQuery
+                $("#"+_brick.id).hide(200, function(){$("#"+this.id).remove()});
+
+                //Кроссбраузерно получаем текст с количеством очков за кирпич 
+                var _brickInnerText;
+                if (_brick.innerText)
+                   _brickInnerText = _brick.innerText
+                else
+                   _brickInnerText = _brick.textContent //для Firefox
+ 
+                //Определяем очки за кирпич и суммируем результат
+                var _brickScore = parseInt(_brickInnerText);
+
+                if (!isNaN(_brickScore)) 
+                    this.pa.score = this.pa.score + _brickScore;
+
+                //Обновляем очки 
+                this.pa.showInfo();
+                return;
+              }
+           }
+   
+       //Перемещение шарика
+       this.element.offset({left:_ball_offset.left + this.dx, top:_ball_offset.top + this.dy});
+      }
+   }
+
+/*------------------------------------Основной код--------------------------------------------------*/
+//Основные настройки игры
+   const _bricks_line = 20;      //Количество кирпичей в ряду (определяет ширину кирпича)
+   const _bricks_lines = 5;      //Количество рядов кирпичей
+   const _bricks_lines_max = 20; //Максимальное количество рядов кирпичей (определяет высоту кирпича)
+   const _ball_dy = 5;           //Скорость шарика по вертикали
+   const _ball_dx_max = 5;       //Максимальная скорость шарика по горизонтали (ограничение результата 'подрезки' шарика платформой-ракеткой)
+   const _try_count_max = 5;     //Количество попыток (шариков)
+
+//Экземпляр игровой площадки
+   var _pa;  
+
+//Глобальные функции
+//Рестарт игры
+   function restart()
+   {
+     if (_pa.platform.interval)
+         clearInterval(_pa.platform.interval);
+
+     //Подготовка площадки 
+     _pa.prepare(); 
+     //Вычисление вектора перемещения платформы каждые 10 мс.
+     _pa.platform.interval = window.setInterval(function() {_pa.platform.evaluate_dx()}, 10);
+   } 
+
+//Запуск шарика
+   function launchBall()
+   {
+     //запуск шарика
+     _pa.ball.kick();
+     //Перемещение шарика каждые 10 мс.
+     _pa.ball.interval = window.setInterval(function() {_pa.ball.move()}, 10);                    
+     //шарик в состоянии 'полета'
+     _pa.ball.ready = false;       
+   }
+
+//Конец игры
+   function gameOver()
+   {
+     alert("Игра окончена. Ваши очки: " + _pa.score);
+     restart();
+   } 
+
+//Инициализация структур данных 'Арканоид' после загрузки страницы средствами jQuery
+   $(document).ready(function() 
+   {
+     //Создаем игровую площадку 
+     _pa = new pa();
+
+     //Инициализируем игру
+     restart();
+
+     //Привязываем обработку события mousemove средствами jQuery
+     $(document).mousemove(function(event) 
+                  {
+                   //Кроссбраузерное получение события       
+                   event = event || window.event;
+
+                   //Кроссбраузерное получение координат мыши и перемещение платформы
+                   _pa.platform.move(event.pageX || event.x);
+                  })
+
+     //Привязываем обработку события mousedown средствами jQuery
+     $(document).mousedown(function(event) 
+                  {
+                    //Если шарик в состоянии 'полета', то ничего не делаем
+                    if (!_pa.ball.ready)
+                        return;
+
+                    //Запуск шарика
+                    launchBall();
+                  })
+   })

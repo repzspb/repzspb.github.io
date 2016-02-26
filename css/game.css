@@ -1,0 +1,94 @@
+#playing-area /*Игровая площадка*/
+    {
+     position : absolute;
+     left : 10%; top : 10%; width : 80%; height : 80%;
+     background-color : rgba(200,200,200,0.5);
+     box-shadow: 0px 0px 20px #777;
+     z-index:0;
+    }
+
+   #info /*Информационная панель*/
+    {
+     position : absolute;
+     left : 0%; top : 0%; width : 10%; height : 100%;
+     border : none;
+     font-family : "trebuchet ms", Verdana, Tahoma, Arial, Sans-Serif;
+     font-size : 18px;
+     color : Dodgerblue;
+    }
+
+   #platform /*Платформа*/
+    {
+     position : absolute;
+     left : 50%; top : 100%; width : 150px; height : 20px;
+     margin-left : -75px;
+     margin-top : -20px;
+     border : none;
+     background-color : #777;
+     box-shadow: inset 0px 0px 20px #fff;
+     z-index:1;
+    }
+
+   #platform p /*Параграф внутри платформы*/
+    {
+      margin : 0;
+      font-family : "trebuchet ms", Verdana, Tahoma, Arial, Sans-Serif;
+      font-size : 14px;
+      font-weight : bold;
+      color : #777;
+      text-align : center; 
+      text-shadow: #fff 1px 1px 2px;
+    }
+
+   #ball,.ball /*Мяч (в игре и для обозначения количества попыток)*/
+    {
+     position : absolute;
+     width : 20px; height : 20px;
+     background-color : #555;
+     border-radius: 10px;  
+     box-shadow: inset 5px 0px 5px #fff;
+     z-index:1;
+    }
+
+   .brick /*Кирпич*/
+    {
+     position : absolute;
+     border : none;
+     background-color : #bbb;
+     border-radius: 5px;  
+     box-shadow: inset 0px 0px 10px #333;
+     z-index:1;
+    }
+
+   .brick p /*Параграф внутри кирпича*/
+    {
+      margin : 0;
+      font-family : "trebuchet ms", Verdana, Tahoma, Arial, Sans-Serif;
+      font-size : 14px;
+      font-weight : bold;
+      color : #777;
+      text-align : center; 
+      text-shadow: #fff 1px 1px 2px;
+    }
+
+    h1 {/*Стиль для вывода заголовка*/
+      font-family : "trebuchet ms", Verdana, Tahoma, Arial, Sans-Serif;
+      font-size : 20px;
+      color : #777;
+      text-align : center;
+    }
+
+   .copyright {/*Блок для вывода информации об авторском праве*/
+      position : absolute;
+      left : 50%; top : 100%; width : 700px; height : 40px;
+      margin-left : -350px;
+      margin-top : -40px;
+    }
+
+   .copyright p {/*Стиль для вывода информации об авторском праве*/
+      font-family : "trebuchet ms", Verdana, Tahoma, Arial, Sans-Serif;
+      font-size : 11px;
+      color : #111;
+      position : relative;
+      text-align : center;
+    }
