@@ -144,7 +144,7 @@
       //Установка шарика по центру платформы
       this.setUp = function()
       {
-       this.element.offset({left:this.pa.platform.element.offset().left + this.pa.platform.width / 2 - this.width / 2, top:this.pa.platform.element.offset().top - this.height});  
+      // this.element.offset({left:this.pa.platform.element.offset().left + this.pa.platform.width / 2 - this.width / 2, top:this.pa.platform.element.offset().top - this.height});  
       }  
    
       //Обработка 'падения' шарика - отключение обработчика, установка на платформе и обнуление вектора смещения
